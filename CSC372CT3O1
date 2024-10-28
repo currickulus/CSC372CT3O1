@@ -1,0 +1,121 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Random;
+
+public class CSC372CT3O1 {
+    private JFrame frame;
+    private JTextArea textArea;
+    private JMenuItem changeBackgroundMenuItem;
+    private JScrollPane scrollPane;
+
+    public CSC372CT3O1() {
+        createAndShowGUI();
+
+    }
+    private void createAndShowGUI() {
+        frame = new JFrame("CSC372CT3O1");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setPreferredSize(new Dimension(600, 400));
+        textArea = new JTextArea();
+        textArea.setLineWrap(true);
+        scrollPane = new JScrollPane(textArea);
+
+        JMenuBar menuBar = new JMenuBar();
+        JMenu fileMenu = new JMenu("File");
+        JMenuItem showDateTimeMenuItem = new JMenuItem("Show DateTime");
+        JMenuItem writeToFileMenuItem = new
+                JMenuItem("Write to Log");
+        JMenuItem exitMenuItem = new JMenuItem("Exit");
+
+        showDateTimeMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showDateTime();
+            }
+        });
+        writeToFileMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                writeToFile();
+            }
+        });
+        exitMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        });
+        fileMenu.add(showDateTimeMenuItem);
+        fileMenu.add(writeToFileMenuItem);
+        fileMenu.addSeparator();
+        fileMenu.add(exitMenuItem);
+
+        JMenu backgroundMenu = new JMenu("Background");
+        changeBackgroundMenuItem = new JMenuItem("Change Background");
+
+        changeBackgroundMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                changeBackgroundColor();
+            }
+        });
+        backgroundMenu.add(changeBackgroundMenuItem);
+        menuBar.add(fileMenu);
+        menuBar.add(backgroundMenu);
+
+        frame.setJMenuBar(menuBar);
+        frame.getContentPane().add(scrollPane);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+     private void showDateTime() {
+         LocalDateTime now = LocalDateTime.now();
+         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+         String formattedDateTime = now.format(formatter);
+         textArea.setText(formattedDateTime);
+     }
+     private void writeToFile() {
+        try(FileWriter fileWriter = new FileWriter("log.txt")) {
+            fileWriter.write(textArea.getText());
+        }catch (IOException e){
+            JOptionPane.showMessageDialog(frame, "Error writing to log file");
+            JOptionPane.showMessageDialog(null, "Error writing to log file");
+        }
+    }
+    private static Color getContrastingColor(Color backgroundColor) {
+        int yiq = ((backgroundColor.getRed() * 299) +
+                (backgroundColor.getGreen() * 587) +
+                (backgroundColor.getBlue() * 114)) / 1000;
+        return (yiq >= 128) ? Color.black : Color.white;
+    }
+    private void changeBackgroundColor() {
+        Random rand = new Random();
+        int green = rand.nextInt(254);
+        Color randomGreen = new Color(0,green,0);
+        frame.getContentPane().setBackground(randomGreen);
+        scrollPane.setBackground(randomGreen);
+        textArea.setBackground(randomGreen);
+        
+        Color textColor = getContrastingColor(randomGreen);
+        textArea.setForeground(textColor);
+
+        String hexColor = String.format("#%02x%02x%02x",
+        randomGreen.getRed(), randomGreen.getGreen(), randomGreen.getBlue());
+        changeBackgroundMenuItem.setText("Change Background(Current hue: " + hexColor + ")");
+    }
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                new CSC372CT3O1();
+            }
+
+        })
+   ; }
+}
